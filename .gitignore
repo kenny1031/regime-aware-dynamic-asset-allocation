@@ -235,9 +235,9 @@ Thumbs.db
 # Data
 # =========================
 # Keep raw and processed datasets out of Git by default
-data/raw/*
-data/interim/*
-data/processed/*
+#data/raw/*
+#data/interim/*
+#data/processed/*
 
 # But keep folder structure and documentation
 !data/raw/.gitkeep

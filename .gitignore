@@ -205,3 +205,97 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Virtual environments
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.iml
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# =========================
+# Environment / secrets
+# =========================
+.env.*
+*.env
+
+# =========================
+# Data
+# =========================
+# Keep raw and processed datasets out of Git by default
+data/raw/*
+data/interim/*
+data/processed/*
+
+# But keep folder structure and documentation
+!data/raw/.gitkeep
+!data/raw/README.md
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# Optional: if you want to commit small metadata files later, uncomment these
+# !data/processed/asset_metadata.csv
+# !data/processed/missingness_report.csv
+
+# Large tabular/binary files
+*.csv
+*.xls
+*.parquet
+*.feather
+*.h5
+*.pkl
+*.joblib
+
+# =========================
+# Model artifacts
+# =========================
+models/
+checkpoints/
+artifacts/
+*.ckpt
+*.pt
+*.pth
+*.onnx
+
+# =========================
+# Outputs
+# =========================
+figures/
+reports/
+outputs/
+
+# Keep folder structure if needed
+!figures/.gitkeep
+!reports/.gitkeep
+!outputs/.gitkeep
+
+# =========================
+# Caches / temporary files
+# =========================
+.cache/
+tmp/
+temp/
+*.tmp
+
+# =========================
+# OS-generated files
+# =========================
+Icon?
+._*
+
+# =========================
+# Other
+# =========================
+*.pdf

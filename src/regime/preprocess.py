@@ -52,4 +52,3 @@ def prepare_regime_input(
         X_df = pd.DataFrame(X_scaled, columns=feature_cols, index=clean_df.index)
 
     return clean_df, X_df, scaler
-

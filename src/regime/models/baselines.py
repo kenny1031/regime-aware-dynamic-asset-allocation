@@ -3,6 +3,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
 import numpy as np
 
+
 class HMMRegimeModel:
     def __init__(
         self,
@@ -45,7 +46,6 @@ class GMMRegimeModel:
 
     def predict_proba(self, X):
         return self.model.predict_proba(X)
-
 
 
 class KMeansRegimeModel:

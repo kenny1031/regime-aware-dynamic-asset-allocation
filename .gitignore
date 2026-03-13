@@ -261,7 +261,6 @@ Thumbs.db
 # =========================
 # Model artifacts
 # =========================
-models/
 checkpoints/
 artifacts/
 *.ckpt

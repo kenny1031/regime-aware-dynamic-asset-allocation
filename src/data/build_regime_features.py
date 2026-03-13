@@ -1,15 +1,13 @@
 import numpy as np
 import pandas as pd
-from src.data.data_preprocessing import ASSET_COLUMNS
+from src.data.load_data import ASSET_COLUMNS
 from src.utils.paths import PROCESSED_DIR, INTERIM_DIR
+
 
 EQUITY_ASSETS = [ASSET_COLUMNS[i] for i in range(3)]
 GROWTH_ASSETS = [ASSET_COLUMNS[i] for i in range(len(ASSET_COLUMNS) - 3)]
-DEFENSIVE_ASSETS = [
-    ASSET_COLUMNS[i] for i in range(
-        len(ASSET_COLUMNS) - 3,
-        len(ASSET_COLUMNS)
-)]
+DEFENSIVE_ASSETS = [ASSET_COLUMNS[i] for i in range(len(ASSET_COLUMNS) - 3, len(ASSET_COLUMNS))]
+
 
 # Helper: proxy returns
 def build_proxy_returns(returns_wide: pd.DataFrame) -> pd.DataFrame:
@@ -20,6 +18,7 @@ def build_proxy_returns(returns_wide: pd.DataFrame) -> pd.DataFrame:
     df["gd_spread"] = df["growth_proxy_ret"] - df["defensive_proxy_ret"]
 
     return df
+
 
 # ==================
 # Rolling volatility
@@ -37,6 +36,7 @@ def add_rolling_vol_features(
                                 "AFI", "IFI_H", "CASH"]].std(axis=1, skipna=True)
     return out
 
+
 # ========
 # Momentum
 # ========
@@ -52,6 +52,7 @@ def add_momentum_features(df: pd.DataFrame) -> pd.DataFrame:
     out["growth_mom_12m"] = rolling_cum_return(out["growth_proxy_ret"], 12)
 
     return out
+
 
 # ===================
 # Rolling correlation
@@ -116,7 +117,9 @@ def add_stress_features(df: pd.DataFrame) -> pd.DataFrame:
     out["growth_drawdown"] = compute_drawdown(out["growth_proxy_ret"])
 
     out["worst_asset_ret"] = out[ASSET_COLUMNS].min(axis=1, skipna=True)
-    out["num_negative_assets"] = (out[ASSET_COLUMNS] < 0).sum(axis=1)
+    valid_counts = out[ASSET_COLUMNS].notna().sum(axis=1)
+    neg_counts = (out[ASSET_COLUMNS] < 0).sum(axis=1)
+    out["num_negative_assets"] = np.where(valid_counts > 0, neg_counts, np.nan)
 
     return out
 
@@ -187,6 +190,7 @@ def build_regime_feature_metadata() -> pd.DataFrame:
 
     metadata.to_csv(PROCESSED_DIR / "regime_feature_metadata.csv", index=False)
     return metadata
+
 
 if __name__ == "__main__":
     returns_wide = pd.read_csv(INTERIM_DIR / "returns_wide.csv")

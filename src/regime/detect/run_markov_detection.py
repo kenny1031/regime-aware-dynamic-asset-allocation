@@ -1,5 +1,5 @@
 import pandas as pd
-from src.regime.models.baselines import HMMRegimeModel, GMMRegimeModel
+from src.regime.regime_models import  HMMRegimeModel, GMMRegimeModel
 from src.regime.preprocess import (
     load_regime_features,
     prepare_regime_input,

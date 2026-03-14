@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from src.regime.models.baselines import KMeansRegimeModel
+from src.regime.regime_models import KMeansRegimeModel
 from src.regime.preprocess import (
     load_regime_features,
     prepare_regime_input,

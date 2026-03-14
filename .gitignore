@@ -274,7 +274,7 @@ artifacts/
 figures/
 reports/
 outputs/
-
+notebooks/
 # Keep folder structure if needed
 !figures/.gitkeep
 !reports/.gitkeep

@@ -257,6 +257,7 @@ Thumbs.db
 *.h5
 *.pkl
 *.joblib
+*.ipynb
 
 # =========================
 # Model artifacts
@@ -274,7 +275,6 @@ artifacts/
 figures/
 reports/
 outputs/
-notebooks/
 # Keep folder structure if needed
 !figures/.gitkeep
 !reports/.gitkeep

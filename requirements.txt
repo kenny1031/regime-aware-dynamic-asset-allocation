@@ -1,0 +1,9 @@
+numpy~=2.2.6
+pandas~=2.3.3
+gymnasium~=1.2.3
+matplotlib~=3.10.7
+scikit-learn~=1.7.2
+torch~=2.9.0
+hmmlearn~=0.3.3
+xgboost~=3.2.0
+scipy~=1.15.3

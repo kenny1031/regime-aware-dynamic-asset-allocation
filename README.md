@@ -223,6 +223,7 @@ regime-aware-dynamic-asset-allocation/
 │   ├── portfolio/
 │   ├── regime/
 │   └── utils/
+├── requirements.txt
 └── README.md
 ```
 
@@ -244,6 +245,11 @@ regime-aware-dynamic-asset-allocation/
 * `src/regime/backtest/walkforward_hmm_backtest.py`
 
 ## How to Run
+### 1. Install required modules
+```bash
+pip install -r requirements.txt
+```
+
 ### 1. Build processed data
 ```bash
 python3 -m src.data.load_data

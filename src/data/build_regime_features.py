@@ -7,7 +7,28 @@ from src.utils.paths import PROCESSED_DIR, INTERIM_DIR
 EQUITY_ASSETS = [ASSET_COLUMNS[i] for i in range(3)]
 GROWTH_ASSETS = [ASSET_COLUMNS[i] for i in range(len(ASSET_COLUMNS) - 3)]
 DEFENSIVE_ASSETS = [ASSET_COLUMNS[i] for i in range(len(ASSET_COLUMNS) - 3, len(ASSET_COLUMNS))]
-
+FEATURE_COLUMNS = [
+    "equity_proxy_ret",
+    "growth_proxy_ret",
+    "defensive_proxy_ret",
+    "gd_spread",
+    "AEQ_vol_12m",
+    "ILE_UH_vol_12m",
+    "growth_vol_12m",
+    "cross_sec_vol",
+    "AEQ_mom_3m",
+    "AEQ_mom_12m",
+    "growth_mom_3m",
+    "growth_mom_12m",
+    "corr_AEQ_AFI_12m",
+    "corr_growth_def_12m",
+    "avg_corr_all_12m",
+    "avg_corr_growth_12m",
+    "AEQ_drawdown",
+    "growth_drawdown",
+    "worst_asset_ret",
+    "num_negative_assets",
+]
 
 # Helper: proxy returns
 def build_proxy_returns(returns_wide: pd.DataFrame) -> pd.DataFrame:

@@ -13,30 +13,10 @@ from torch.utils.data import Dataset, DataLoader
 from src.regime.preprocess import load_regime_features
 from src.regime.regime_models import LSTMRegimeClassifier
 from src.utils.paths import PROCESSED_DIR
+from src.data.build_regime_features import FEATURE_COLUMNS
 
 
-DEFAULT_LSTM_FEATURES = [
-    "equity_proxy_ret",
-    "growth_proxy_ret",
-    "defensive_proxy_ret",
-    "gd_spread",
-    "AEQ_vol_12m",
-    "ILE_UH_vol_12m",
-    "growth_vol_12m",
-    "cross_sec_vol",
-    "AEQ_mom_3m",
-    "AEQ_mom_12m",
-    "growth_mom_3m",
-    "growth_mom_12m",
-    "corr_AEQ_AFI_12m",
-    "corr_growth_def_12m",
-    "avg_corr_all_12m",
-    "avg_corr_growth_12m",
-    "AEQ_drawdown",
-    "growth_drawdown",
-    "worst_asset_ret",
-    "num_negative_assets",
-]
+DEFAULT_LSTM_FEATURES = FEATURE_COLUMNS
 
 
 def load_hmm_labels(filename: str = "hmm_regime_labels.csv") -> pd.DataFrame:

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from src.data.load_data import ASSET_COLUMNS
-from src.regime.models.baselines import HMMRegimeModel
+from src.regime.regime_models import HMMRegimeModel
 from src.regime.preprocess import DEFAULT_HMM_FEATURES
 from src.portfolio.regime_optimisation import optimise_regime_portfolio, build_default_bounds
 from src.utils.paths import PROCESSED_DIR

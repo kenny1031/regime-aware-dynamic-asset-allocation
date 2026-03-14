@@ -5,9 +5,18 @@ from src.regime.preprocess import (
     prepare_regime_input,
     DEFAULT_HMM_FEATURES
 )
+from src.regime.plotting import (
+    plot_regime_timeline,
+    plot_regime_strip,
+    plot_regime_probabilities,
+    plot_growth_with_regime_shading
+)
 from src.utils.paths import PROCESSED_DIR
 
-models = {"hmm": HMMRegimeModel, "gmm": GMMRegimeModel}
+models = {
+    "hmm": HMMRegimeModel, # Primary regime model
+    "gmm": GMMRegimeModel  # Baseline comparator
+}
 
 def build_regime_label_table(
     clean_df: pd.DataFrame,
@@ -108,6 +117,21 @@ def main() -> None:
         # Optional relabelling for interpretability
         regime_df = relabel_regimes_by_risk(regime_df)
 
+        regime_df["regime_name"] = regime_df["regime"].map({
+            0: "Neutral",
+            1: "Risk-On",
+            2: "Risk-Off"
+        })
+
+        #plot_regime_timeline(regime_df, model_name=model_name)
+        plot_regime_strip(regime_df, model_name=model_name)
+        plot_regime_probabilities(regime_df, model_name=model_name)
+        plot_growth_with_regime_shading(
+            regime_df=regime_df,
+            value_col="growth_vol_12m",
+            model_name=model_name
+        )
+
         summary = build_regime_summary(
             regime_df,
             feature_cols=interpret_cols
@@ -122,6 +146,10 @@ def main() -> None:
               f"{PROCESSED_DIR / f'{model_name}_regime_summary.csv'}")
         print(regime_df.head(15))
         print(summary)
+        print(regime_df["regime"].value_counts().sort_index())
+        if model_name == "hmm":
+            print("HMM Transition Matrix:")
+            print(model.model.transmat_)
 
 if __name__ == "__main__":
     main()

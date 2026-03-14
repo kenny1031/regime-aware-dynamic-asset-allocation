@@ -4,6 +4,9 @@ from sklearn.cluster import KMeans
 import numpy as np
 
 
+# ===================
+# Hidden Markov Model
+# ===================
 class HMMRegimeModel:
     def __init__(
         self,
@@ -29,6 +32,9 @@ class HMMRegimeModel:
         return self.model.predict_proba(X)
 
 
+# ======================
+# Gaussian Mixture Model
+# ======================
 class GMMRegimeModel:
     def __init__(self, n_states=3, random_state=42):
         self.n_states = n_states
@@ -48,6 +54,9 @@ class GMMRegimeModel:
         return self.model.predict_proba(X)
 
 
+# ==================
+# K-Means Clustering
+# ==================
 class KMeansRegimeModel:
     def __init__(self, n_states=3, random_state=42):
         self.n_states = n_states

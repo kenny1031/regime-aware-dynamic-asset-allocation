@@ -310,6 +310,11 @@ regime-aware-dynamic-asset-allocation/
 * `src/regime/backtest/regime_switching_backtest.py`
 * `src/regime/backtest/walkforward_hmm_backtest.py`
 
+### Reinforcement learning
+- `src/rl/env.py`
+- `src/rl/smoke_test.py`
+- `src/rl/train_ppo.py`
+
 ## How to Run
 ### 1. Install required modules
 ```bash
@@ -342,8 +347,9 @@ python3 -m src.backtest.regime_switching_backtest
 python3 -m src.backtest.walkforward_hmm_backtest
 ```
 
-### 5. Dynamic allocation prototype
+### 5. Run RL prototype
 ```bash
+python3 -m src.rl.smoke_test
 python3 -m src.rl.train_ppo
 ```
 

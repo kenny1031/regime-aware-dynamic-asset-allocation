@@ -203,7 +203,7 @@ Using the HMM regime assignments, the project estimates regime-specific:
 For each regime, a constrained quadratic-utility portfolio is solved:
 
 $$
-\max_{\mathbf{w}} \; \mathbf{w}^\top \boldsymbol\mu - \frac{\lambda}{2} \mathbf{w}^\top \boldsymbol{\Sigma} \mathbf{w}
+\max_{\mathbf{w}}{\mathbf{w}^\top \boldsymbol\mu - \frac{\lambda}{2} \mathbf{w}^\top \boldsymbol{\Sigma} \mathbf{w}}
 $$
 
 subject to:

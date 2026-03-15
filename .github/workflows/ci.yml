@@ -1,0 +1,91 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile source files
+        run: |
+          python -m compileall src
+
+      - name: Smoke test imports
+        run: |
+          python - <<'PY'
+          import importlib
+
+          modules = [
+              "src.data.load_data",
+              "src.data.build_regime_features",
+              "src.regime.regime_models",
+              "src.regime.preprocess",
+              "src.regime.plotting",
+              "src.regime.labelling",
+              "src.portfolio.regime_statistics",
+              "src.portfolio.regime_optimisation",
+              "src.backtest.regime_switching_backtest",
+              "src.backtest.walkforward_hmm_backtest",
+              "src.rl.env",
+              "src.rl.utils",
+              "src.rl.train_ppo",
+          ]
+
+          for m in modules:
+              importlib.import_module(m)
+              print(f"Imported: {m}")
+          PY
+
+      - name: RL environment smoke test
+        run: |
+          python - <<'PY'
+          import numpy as np
+          from src.rl.env import RegimeAllocationEnv
+
+          env = RegimeAllocationEnv(transaction_cost_bps=10.0, risk_penalty=0.0)
+          obs, info = env.reset()
+
+          print("Initial observation shape:", obs.shape)
+          assert obs.shape[0] == env.obs_dim
+
+          done = False
+          steps = 0
+          while not done and steps < 5:
+              action = np.random.randn(env.n_assets)
+              obs, reward, terminated, truncated, info = env.step(action)
+              print(f"step={steps}, reward={reward:.6f}, wealth={info['wealth']:.4f}")
+              done = terminated or truncated
+              steps += 1
+
+          print("RL smoke test passed.")
+          PY

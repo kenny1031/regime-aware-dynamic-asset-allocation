@@ -1,5 +1,6 @@
 import pandas as pd
-from src.regime.regime_models import  HMMRegimeModel, GMMRegimeModel
+from hmmlearn.hmm import GaussianHMM
+from sklearn.mixture import GaussianMixture
 from src.regime.preprocess import (
     load_regime_features,
     prepare_regime_input,
@@ -13,10 +14,62 @@ from src.regime.plotting import (
 )
 from src.utils.paths import PROCESSED_DIR
 
+
+# ===================
+# Hidden Markov Model
+# ===================
+class HMMRegimeModel:
+    def __init__(
+        self,
+        n_states=3,
+        covariance_type="full",
+        random_state=42
+    ):
+        self.n_states = n_states
+        self.model = GaussianHMM(
+            n_components=n_states,
+            covariance_type=covariance_type,
+            random_state=random_state
+        )
+
+    def fit(self, X):
+        self.model.fit(X)
+        return self
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        return self.model.predict_proba(X)
+
+
+# ======================
+# Gaussian Mixture Model
+# ======================
+class GMMRegimeModel:
+    def __init__(self, n_states=3, random_state=42):
+        self.n_states = n_states
+        self.model = GaussianMixture(
+            n_components=n_states,
+            random_state=random_state
+        )
+
+    def fit(self, X):
+        self.model.fit(X)
+        return self
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        return self.model.predict_proba(X)
+
+
 models = {
     "hmm": HMMRegimeModel, # Primary regime model
     "gmm": GMMRegimeModel  # Baseline comparator
 }
+
 
 def build_regime_label_table(
     clean_df: pd.DataFrame,
@@ -34,6 +87,7 @@ def build_regime_label_table(
 
     return result
 
+
 def build_regime_summary(
     regime_df: pd.DataFrame,
     feature_cols: list[str],
@@ -43,6 +97,57 @@ def build_regime_summary(
         .agg(["mean", "std", "count"])
     )
     return summary
+
+
+def build_transition_matrix_df(model, regime_name_map: dict[int, str]) -> pd.DataFrame:
+    transmat = model.model.transmat_
+
+    state_labels = [regime_name_map[i] for i in range(transmat.shape[0])]
+
+    df_trans = pd.DataFrame(
+        transmat,
+        index=[f"from_{s}" for s in state_labels],
+        columns=[f"to_{s}" for s in state_labels],
+    )
+    return df_trans
+
+
+def build_regime_duration_summary(
+    regime_df: pd.DataFrame,
+    regime_name_map: dict[int, str]
+) -> pd.DataFrame:
+    temp = regime_df[["date", "regime"]].copy()
+    temp = temp.sort_values("date").reset_index(drop=True)
+
+    temp["block"] = (temp["regime"] != temp["regime"].shift(1)).cumsum()
+
+    durations = (
+        temp.groupby(["block", "regime"])
+        .size()
+        .reset_index(name="duration")
+    )
+
+    summary = (
+        durations.groupby("regime")["duration"]
+        .agg(
+            n_spells="count",
+            mean_duration="mean",
+            median_duration="median",
+            max_duration="max",
+            min_duration="min",
+            std_duration="std",
+        )
+        .reset_index()
+    )
+
+    summary["regime_name"] = summary["regime"].map(regime_name_map)
+    summary = summary[
+        ["regime", "regime_name", "n_spells", "mean_duration",
+         "median_duration", "max_duration", "min_duration", "std_duration"]
+    ]
+
+    return summary
+
 
 def relabel_regimes_by_risk(regime_df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -72,6 +177,7 @@ def relabel_regimes_by_risk(regime_df: pd.DataFrame) -> pd.DataFrame:
     temp = pd.concat([temp, reordered], axis=1)
 
     return temp
+
 
 def main() -> None:
     model_names = models.keys()
@@ -117,11 +223,13 @@ def main() -> None:
         # Optional relabelling for interpretability
         regime_df = relabel_regimes_by_risk(regime_df)
 
-        regime_df["regime_name"] = regime_df["regime"].map({
+        regime_name_map = {
             0: "Neutral",
             1: "Risk-On",
             2: "Risk-Off"
-        })
+        }
+
+        regime_df["regime_name"] = regime_df["regime"].map(regime_name_map)
 
         #plot_regime_timeline(regime_df, model_name=model_name)
         plot_regime_strip(regime_df, model_name=model_name)
@@ -147,9 +255,17 @@ def main() -> None:
         print(regime_df.head(15))
         print(summary)
         print(regime_df["regime"].value_counts().sort_index())
+
         if model_name == "hmm":
+            transition_df = build_transition_matrix_df(model, regime_name_map)
+            transition_df.to_csv(PROCESSED_DIR / "hmm_transition_matrix.csv")
+            duration_summary = build_regime_duration_summary(regime_df, regime_name_map)
+            duration_summary.to_csv(PROCESSED_DIR / "hmm_regime_duration_summary.csv", index=False)
             print("HMM Transition Matrix:")
-            print(model.model.transmat_)
+            print(transition_df)
+            print("HMM Regime Duration Summary:")
+            print(duration_summary)
+
 
 if __name__ == "__main__":
     main()

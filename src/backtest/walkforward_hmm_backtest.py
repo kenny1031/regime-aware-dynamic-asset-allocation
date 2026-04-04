@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from src.data.load_data import ASSET_COLUMNS
-from src.regime.regime_models import HMMRegimeModel
+from src.regime.detect.run_markov_detection import HMMRegimeModel
 from src.regime.preprocess import DEFAULT_HMM_FEATURES
 from src.portfolio.regime_optimisation import optimise_regime_portfolio, build_default_bounds
 from src.utils.paths import PROCESSED_DIR
+from src.regime.plotting import plot_walkforward_strategy_paths
 
 
 def build_static_balanced_weights() -> pd.Series:
@@ -476,12 +477,14 @@ def main():
         all_bt,
         filename="walkforward_hmm_summary.csv"
     )
+    plot_walkforward_strategy_paths(all_bt)
 
     print("\n=== Walk-Forward Performance Summary ===")
     print(summary)
 
     print("\n=== Final Wealth by Strategy ===")
     print(all_bt.groupby("strategy")["wealth"].last())
+
 
 
 if __name__ == "__main__":

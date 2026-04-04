@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import torch
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from src.rl.env import RegimeAllocationEnv
@@ -84,6 +85,12 @@ def build_summary(eval_df: pd.DataFrame) -> pd.DataFrame:
 def main():
     # Vectorise training env
     vec_env = make_vec_env(make_train_env, n_envs=1)
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif torch.backends.mps.is_available():
+        device = "mps"
+    else:
+        device = "cpu"
     model = PPO(
         policy="MlpPolicy",
         env=vec_env,
@@ -97,6 +104,7 @@ def main():
         ent_coef=0.0,
         vf_coef=0.5,
         verbose=1,
+        device=device,
     )
 
     print("\n=== Training PPO Agent ===")

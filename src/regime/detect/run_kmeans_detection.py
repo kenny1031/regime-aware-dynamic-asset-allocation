@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from src.regime.regime_models import KMeansRegimeModel
 from src.regime.preprocess import (
     load_regime_features,
     prepare_regime_input,
@@ -12,6 +11,35 @@ from src.regime.plotting import (
     plot_growth_with_regime_shading
 )
 from src.utils.paths import PROCESSED_DIR
+from sklearn.cluster import KMeans
+
+
+# ==================
+# K-Means Clustering
+# ==================
+class KMeansRegimeModel:
+    def __init__(self, n_states=3, random_state=42):
+        self.n_states = n_states
+        self.model = KMeans(
+            n_clusters=n_states,
+            random_state=random_state,
+            n_init=20
+        )
+
+    def fit(self, X):
+        self.model.fit(X)
+        return self
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        # KMeans has no actual posterior probability
+        labels = self.model.predict(X)
+        probs = np.zeros((len(labels), self.model.n_clusters))
+        probs[np.arange(len(labels)), labels] = 1.0
+
+        return probs
 
 
 def build_regime_label_table(

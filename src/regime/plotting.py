@@ -53,8 +53,11 @@ def _contiguous_regime_segments(
     for i in range(1, len(out)):
         if out.loc[i, regime_col] != current_regime:
             start_date = out.loc[start_idx, "date"]
-            end_date = out.loc[i-1, "date"]
+            end_date = out.loc[i - 1, "date"]
             segments.append((start_date, end_date, current_regime))
+
+            start_idx = i
+            current_regime = out.loc[i, regime_col]
 
     # final segment
     segments.append((
@@ -241,5 +244,81 @@ def plot_regime_strip(
     plt.tight_layout()
     if save_path is None:
         save_path = FIGURES_DIR / f"regime/{model_name.lower()}_regime_strip.png"
+    plt.savefig(save_path, dpi=200, bbox_inches="tight")
+    plt.show()
+
+
+def plot_walkforward_strategy_paths(
+    backtest_df: pd.DataFrame,
+    save_path: str | None = None,
+    normalise_to_100: bool = True,
+    figsize: tuple = (14, 6),
+) -> None:
+    """
+    Plot walk-forward out-of-sample wealth paths for each strategy.
+
+    Expected columns in backtest_df:
+    - date
+    - strategy
+    - wealth
+    """
+    df = backtest_df.copy()
+
+    required_cols = {"date", "strategy", "wealth"}
+    missing = required_cols - set(df.columns)
+    if missing:
+        raise ValueError(f"Missing required columns for plotting: {missing}")
+
+    df["date"] = pd.to_datetime(df["date"])
+    df = df.sort_values(["strategy", "date"]).reset_index(drop=True)
+
+    y_col = "wealth"
+    y_label = "Wealth"
+
+    if normalise_to_100:
+        df["wealth_plot"] = (
+            df.groupby("strategy")["wealth"]
+            .transform(lambda x: x / x.iloc[0] * 100)
+        )
+        y_col = "wealth_plot"
+        y_label = "Normalised Wealth (Start = 100)"
+
+    display_names = {
+        "WF_Static_Balanced": "Static Balanced",
+        "WF_HMM_Hard": "HMM Hard Switching",
+        "WF_HMM_Soft": "HMM Soft Switching",
+    }
+
+    strategy_order = [
+        "WF_Static_Balanced",
+        "WF_HMM_Hard",
+        "WF_HMM_Soft",
+    ]
+
+    fig, ax = plt.subplots(figsize=figsize)
+
+    for strategy in strategy_order:
+        sub = df[df["strategy"] == strategy].copy()
+        if sub.empty:
+            continue
+
+        ax.plot(
+            sub["date"],
+            sub[y_col],
+            label=display_names.get(strategy, strategy),
+            linewidth=2.0,
+        )
+
+    ax.set_title("Walk-Forward Out-of-Sample Strategy Paths")
+    ax.set_xlabel("Date")
+    ax.set_ylabel(y_label)
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+
+    if save_path is None:
+        save_path = FIGURES_DIR / "regime/walkforward_strategy_paths.png"
+
     plt.savefig(save_path, dpi=200, bbox_inches="tight")
     plt.show()

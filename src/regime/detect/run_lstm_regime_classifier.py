@@ -11,12 +11,64 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from src.regime.preprocess import load_regime_features
-from src.regime.regime_models import LSTMRegimeClassifier
 from src.utils.paths import PROCESSED_DIR
 from src.data.build_regime_features import FEATURE_COLUMNS
 
 
 DEFAULT_LSTM_FEATURES = FEATURE_COLUMNS
+
+
+# ======================
+# LSTM Regime Classifier
+# ======================
+class LSTMRegimeClassifier(nn.Module):
+    def __init__(
+        self,
+        input_size: int,
+        hidden_size: int = 64,
+        num_layers: int = 2,
+        num_classes: int = 3,
+        dropout: float = 0.2
+    ):
+        super().__init__()
+
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,
+            dropout=dropout if num_layers > 1 else 0.0,
+        )
+
+        self.classifier = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_size, num_classes),
+        )
+
+    def forward(self, x):
+        """
+        Parameters
+        ----------
+        x : torch.Tensor
+            Shape: (batch_size, seq_len, input_size)
+
+        Returns
+        -------
+        logits : torch.Tensor
+            Shape: (batch_size, num_classes)
+        """
+        lstm_out, (h_n, c_n) = self.lstm(x)
+
+        # Use final hidden state from the last LSTM layer
+        last_hidden = h_n[-1] # shape: (batch_size, hidden_state)
+
+        logits = self.classifier(last_hidden)
+        return logits
 
 
 def load_hmm_labels(filename: str = "hmm_regime_labels.csv") -> pd.DataFrame:
